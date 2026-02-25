@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Calendar To-Do</title>
+    <style>
+        :root {
+            --primary: #4a90e2;
+            --bg: #f4f7f6;
+            --text: #333;
+        }
+
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        
+        #calendar-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 90%; max-width: 800px; }
+
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        
+        .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+        
+        .day { border: 1px solid #ddd; min-height: 100px; padding: 5px; border-radius: 4px; background: #fff; transition: 0.2s; }
+        .day:hover { border-color: var(--primary); }
+        .day-header { font-weight: bold; font-size: 0.8em; margin-bottom: 5px; color: #666; }
+        .today { background: #eef6ff; border: 2px solid var(--primary); }
+
+        .task-list { list-style: none; padding: 0; margin: 0; font-size: 0.75em; }
+        .task-item { background: #eee; margin-bottom: 2px; padding: 2px 5px; border-radius: 2px; display: flex; justify-content: space-between; cursor: pointer; }
+        .task-item:hover { background: #ddd; }
+
+        button { cursor: pointer; background: var(--primary); color: white; border: none; border-radius: 4px; padding: 5px 10px; }
+        
+        /* Modal for adding/editing */
+        #modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; box-shadow: 0 0 20px rgba(0,0,0,0.5); border-radius: 8px; z-index: 10; }
+        .overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.3); z-index: 5; }
+    </style>
+</head>
+<body>
+
+    <div id="calendar-container">
+        <div class="header">
+            <button onclick="changeMonth(-1)">Prev</button>
+            <h2 id="monthDisplay"></h2>
+            <button onclick="changeMonth(1)">Next</button>
+        </div>
+        <div class="grid" id="calendarGrid"></div>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="closeModal()"></div>
+    <div id="modal">
+        <h3 id="modalTitle">Add Task</h3>
+        <input type="text" id="taskInput" placeholder="Enter task..." style="width: 100%; padding: 8px; margin-bottom: 10px;">
+        <br>
+        <button onclick="saveTask()">Save</button>
+        <button onclick="deleteTask()" id="deleteBtn" style="background: #e74c3c;">Delete</button>
+        <button onclick="closeModal()" style="background: #95a5a6;">Cancel</button>
+    </div>
+
+    <script>
+        let currentDate = new Date();
+        let tasks = JSON.parse(localStorage.getItem('calendarTasks')) || {};
+        let selectedDateKey = null;
+        let selectedTaskIdx = null;
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            const monthDisplay = document.getElementById('monthDisplay');
+            grid.innerHTML = '';
+
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            monthDisplay.innerText = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(currentDate);
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            // Padding for start of month
+            for (let i = 0; i < firstDay; i++) {
+                grid.innerHTML += `<div class="day-empty"></div>`;
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateKey = `${year}-${month + 1}-${day}`;
+                const isToday = new Date().toDateString() === new Date(year, month, day).toDateString();
+                
+                const dayEl = document.createElement('div');
+                dayEl.className = `day ${isToday ? 'today' : ''}`;
+                dayEl.innerHTML = `
+                    <div class="day-header">${day}</div>
+                    <ul class="task-list" id="list-${dateKey}"></ul>
+                    <button style="font-size: 10px; margin-top: 5px;" onclick="openModal('${dateKey}')">+ Add</button>
+                `;
+
+                grid.appendChild(dayEl);
+                renderTasks(dateKey);
+            }
+        }
+
+        function renderTasks(dateKey) {
+            const listEl = document.getElementById(`list-${dateKey}`);
+            if (!listEl) return;
+            listEl.innerHTML = '';
+            
+            if (tasks[dateKey]) {
+                tasks[dateKey].forEach((task, idx) => {
+                    const li = document.createElement('li');
+                    li.className = 'task-item';
+                    li.innerText = task;
+                    li.onclick = (e) => { e.stopPropagation(); openModal(dateKey, idx); };
+                    listEl.appendChild(li);
+                });
+            }
+        }
+
+        function openModal(dateKey, idx = null) {
+            selectedDateKey = dateKey;
+            selectedTaskIdx = idx;
+            const modal = document.getElementById('modal');
+            const overlay = document.getElementById('overlay');
+            const input = document.getElementById('taskInput');
+            const deleteBtn = document.getElementById('deleteBtn');
+
+            input.value = idx !== null ? tasks[dateKey][idx] : '';
+            deleteBtn.style.display = idx !== null ? 'inline-block' : 'none';
+            document.getElementById('modalTitle').innerText = idx !== null ? 'Edit Task' : 'Add Task';
+
+            modal.style.display = 'block';
+            overlay.style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }
+
+        function saveTask() {
+            const val = document.getElementById('taskInput').value;
+            if (!val) return;
+
+            if (!tasks[selectedDateKey]) tasks[selectedDateKey] = [];
+
+            if (selectedTaskIdx !== null) {
+                tasks[selectedDateKey][selectedTaskIdx] = val;
+            } else {
+                tasks[selectedDateKey].push(val);
+            }
+
+            persistAndRefresh();
+        }
+
+        function deleteTask() {
+            tasks[selectedDateKey].splice(selectedTaskIdx, 1);
+            persistAndRefresh();
+        }
+
+        function persistAndRefresh() {
+            localStorage.setItem('calendarTasks', JSON.stringify(tasks));
+            renderTasks(selectedDateKey);
+            closeModal();
+        }
+
+        function changeMonth(diff) {
+            currentDate.setMonth(currentDate.getMonth() + diff);
+            renderCalendar();
+        }
+
+        renderCalendar();
+    </script>
+</body>
+</html>
