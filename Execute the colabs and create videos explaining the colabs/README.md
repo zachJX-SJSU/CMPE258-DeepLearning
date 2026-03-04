@@ -14,4 +14,6 @@ Some of the colabs are repeated under the same topics, so I only included one vi
 
 - Linear Algebra for DL: [Colab](https://colab.research.google.com/drive/1w0xpGntEXOdU2sSshgZx0FUtuQ8QmhSz?usp=sharing) | [Video](https://youtu.be/AGqNRg8cM0U)  
 
-- NN from scratch: [Colab](https://colab.research.google.com/drive/1p2G5Pm-XlwHSIXeJ_c7inPIz_aJN5W2b?usp=sharing) | 
+- NN from scratch: [Colab](https://colab.research.google.com/drive/1p2G5Pm-XlwHSIXeJ_c7inPIz_aJN5W2b?usp=sharing) | [Video](https://youtu.be/ICvCp2AAzqA)  
+
+- Why DL works geometric intuition: [Colab](https://colab.research.google.com/drive/1U3doaRh3-DrDKxdQ3yROCSjuUHjO05i_?usp=sharing)
