@@ -1,9 +1,9 @@
 # CMPE258-DeepLearning  
 
 
-- RNN LSTM colab: [Colab]（https://colab.research.google.com/drive/1uDIBjwQB3JHqGFGPjBfqbufC2A1ov4Rj?usp=sharing） | [Video](https://youtu.be/tGTzHvqg1gc)  
+- RNN LSTM colab: [Colab](https://colab.research.google.com/drive/1uDIBjwQB3JHqGFGPjBfqbufC2A1ov4Rj?usp=sharing) | [Video](https://youtu.be/tGTzHvqg1gc)  
 
-- NLP Colabs: [Colab]（https://colab.research.google.com/drive/171s4mHEuiC7XuqoIbgS4D34ilymaVXex?usp=sharing）| [Video](https://youtu.be/RJF4CrhyBMU)  
+- NLP Colabs: [Colab](https://colab.research.google.com/drive/171s4mHEuiC7XuqoIbgS4D34ilymaVXex?usp=sharing)| [Video](https://youtu.be/RJF4CrhyBMU)  
 
 - Vision Transformers:[Colab](https://colab.research.google.com/drive/13F3UNOMuaYUk3hVRZnIoxdXQaFN9-k6d?usp=sharing)| [Video](https://youtu.be/pHRwujWCpiQ)  
 
